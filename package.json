@@ -1,0 +1,17 @@
+{
+  "name": "node-ts",
+  "version": "1.0.1",
+  "description": "Node.js + TypeScript = Node.ts boilerplate",
+  "main": "index.ts",
+  "dependencies": {
+    "@types/node": "latest"
+  },
+  "devDependencies": {
+    "typescript": "latest"
+  },
+  "scripts": {
+    "tsc": "./node_modules/.bin/tsc"
+  },
+  "author": "Volodymyr Khytskyi",
+  "license": "MIT"
+}

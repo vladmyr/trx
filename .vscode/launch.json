@@ -8,7 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceFolder}/src/Mndex.ts",
+            "program": "${workspaceFolder}/src/Main.ts",
             "outFiles": ["${workspaceFolder}/dist/**/*"],
             "sourceMaps": true,
             "preLaunchTask": "tsc"

@@ -1,6 +1,11 @@
-const sayHello = function sayHello(helloTo: string): string {
-  return `Hello, ${helloTo}`;
-};
+import AudioStreamManager from "./AudioStremManager";
 
-console.log(sayHello('world'));
-process.exit(0);
+const audioStreamManager = AudioStreamManager.GetInstance();
+
+audioStreamManager.start(11, 8);
+setTimeout(() => {
+  audioStreamManager.stop()
+}, 5000);
+
+console.log(AudioStreamManager.GetDevices());
+

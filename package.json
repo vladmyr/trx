@@ -1,10 +1,11 @@
 {
-  "name": "node-ts",
+  "name": "tx-win",
   "version": "1.0.1",
-  "description": "Node.js + TypeScript = Node.ts boilerplate",
-  "main": "index.ts",
+  "description": "",
+  "main": "src/Main.ts",
   "dependencies": {
-    "@types/node": "latest"
+    "@types/node": "latest",
+    "naudiodon": "^0.4.7"
   },
   "devDependencies": {
     "typescript": "latest"

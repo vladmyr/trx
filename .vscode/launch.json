@@ -7,9 +7,18 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceFolder}/src/Main.ts",
-            "outFiles": ["${workspaceFolder}/dist/**/*"],
+            "name": "Server",
+            "program": "${workspaceFolder}/src/Server/Main.ts",
+            "outFiles": ["${workspaceFolder}/dist/server/**/*"],
+            "sourceMaps": true,
+            "preLaunchTask": "tsc"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Client",
+            "program": "${workspaceFolder}/src/Client/Main.ts",
+            "outFiles": ["${workspaceFolder}/dist/client/**/*"],
             "sourceMaps": true,
             "preLaunchTask": "tsc"
         }

@@ -2,10 +2,12 @@
   "name": "tx-win",
   "version": "1.0.1",
   "description": "",
-  "main": "src/Main.ts",
+  "main": "src/Client/Main.ts",
   "dependencies": {
     "@types/node": "latest",
-    "naudiodon": "^0.4.7"
+    "naudiodon": "^0.4.7",
+    "node-opus": "^0.3.0",
+    "speaker": "^0.4.1"
   },
   "devDependencies": {
     "typescript": "latest"

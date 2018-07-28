@@ -4,7 +4,7 @@
     "alwaysStrict": true,
     "outDir": "./dist",
     "module": "commonjs",
-    "target": "es5",
+    "target": "es6",
     "sourceMap": true,
     "inlineSources": true,
     "noImplicitAny": true,

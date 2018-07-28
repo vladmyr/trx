@@ -1,4 +1,4 @@
-import AudioStreamManager from "./AudioStremManager";
+import AudioStreamManager from "./AudioStreamManager";
 
 const audioStreamManager = AudioStreamManager.GetInstance();
 

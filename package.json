@@ -5,15 +5,24 @@
   "main": "src/Client/Main.ts",
   "dependencies": {
     "@types/node": "latest",
+    "krtp": "^2.0.1",
     "naudiodon": "^0.4.7",
     "node-opus": "^0.3.0",
+    "oclif": "^1.8.6",
     "speaker": "^0.4.1"
   },
   "devDependencies": {
-    "typescript": "latest"
+    "ava": "^0.25.0",
+    "ava-ts": "^0.25.0",
+    "ts-loader": "^4.4.2",
+    "ts-node": "^7.0.0",
+    "typescript": "latest",
+    "webpack": "^4.15.1",
+    "webpack-cli": "^3.0.8"
   },
   "scripts": {
-    "tsc": "./node_modules/.bin/tsc"
+    "tsc": "./node_modules/.bin/tsc",
+    "webpack:build": "./node_modules/.bin/webpack"
   },
   "author": "Volodymyr Khytskyi",
   "license": "MIT"

@@ -7,6 +7,15 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "CLI",
+            "program": "${workspaceFolder}/src/CLI/Main.ts",
+            "outFiles": ["${workspaceFolder}/dist/cli/**/*"],
+            "sourceMaps": true,
+            "preLaunchTask": "tsc"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Server",
             "program": "${workspaceFolder}/src/Server/Main.ts",
             "outFiles": ["${workspaceFolder}/dist/server/**/*"],

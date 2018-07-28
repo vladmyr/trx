@@ -1,5 +1,5 @@
 {
-  "name": "tx-win",
+  "name": "trx",
   "version": "1.0.1",
   "description": "",
   "main": "src/Client/Main.ts",
@@ -23,6 +23,21 @@
   "scripts": {
     "tsc": "./node_modules/.bin/tsc",
     "webpack:build": "./node_modules/.bin/webpack"
+  },
+  "bin": {
+    "trx-cli": "./bin/run"
+  },
+  "files": [
+    "/bin",
+    "/src/CLI",
+    "/src/Common"
+  ],
+  "oclif": {
+    "commands": "./src/CLI/Commands",
+    "bin": "trx-cli",
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
   },
   "author": "Volodymyr Khytskyi",
   "license": "MIT"

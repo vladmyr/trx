@@ -16,7 +16,9 @@ declare module "naudiodon" {
         defaultLowOutputLatency: number,
         defaultHighInputLatency: number,
         defaultHighOutputLatency: number,
-        hostAPIName: string
+        hostAPIName: string,
+
+        [key: string]: string | number
     }
 
     export interface IAudioOptions {

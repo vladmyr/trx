@@ -1,7 +1,7 @@
 import * as PortAudio from "naudiodon";
 
 interface IDeviceIndex {
-    [i: number]: PortAudio.IDevice
+    [i: string]: PortAudio.IDevice
 }
 
 class Devices {

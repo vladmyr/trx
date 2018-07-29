@@ -21,7 +21,7 @@
     "webpack-cli": "^3.0.8"
   },
   "scripts": {
-    "tsc": "./node_modules/.bin/tsc",
+    "tsc:debug": "./node_modules/.bin/tsc -p tsconfig.debug.json",
     "webpack:build": "./node_modules/.bin/webpack"
   },
   "bin": {

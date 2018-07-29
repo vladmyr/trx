@@ -2,7 +2,7 @@
   "compileOnSave": true,
   "compilerOptions": {
     "alwaysStrict": true,
-    "outDir": "./build/release",
+    "outDir": "./build/debug",
     "module": "commonjs",
     "target": "es6",
     "sourceMap": true,

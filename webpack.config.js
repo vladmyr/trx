@@ -3,7 +3,7 @@
 const Path = require("path");
 
 const configCommon = {
-    mode: "development",
+    mode: "production",
     target: "node",
     devtool: "source-map",
     output: {
@@ -23,16 +23,21 @@ const configCommon = {
 const configCLI = {
     entry: "./src/CLI/Main.ts",
     output: {
-        path: Path.resolve(__dirname, "dist", "cli")
+        path: Path.resolve(__dirname, "build", "release", "cli")
     }
 }
 
-const configClient = {}
+const configClient = {
+    entry: "./src/Client/Main.ts",
+    output: {
+        path: Path.resolve(__dirname, "build", "release", "client")
+    }
+}
 
 const configServer = {
     entry: "./src/Server/Main.ts",
     output: {
-        path: Path.resolve(__dirname, "dist", "server")
+        path: Path.resolve(__dirname, "build", "release", "server")
     }
 }
 
@@ -58,11 +63,10 @@ const buildEntryConfig = (entryConfig) => {
     deepClone(configCommon, config);
     deepClone(entryConfig, config);
     
-    console.log(config);
-
     return config;
 }
 
 module.exports = [
-    configServer
+    configServer,
+    configClient
 ].map(buildEntryConfig)

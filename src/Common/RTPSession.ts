@@ -1,4 +1,10 @@
 import { Socket } from "dgram";
+import { 
+    Readable, 
+    ReadableOptions,
+    Writable, 
+    WritableOptions
+} from "stream";
 
 const KRTPSession = require("krtp").RTPSession;
 
@@ -9,31 +15,51 @@ class RTPSession {
         this._kRTPSession = new KRTPSession(port);
     }
 
+    public getSocket(): Socket {
+        return this._kRTPSession.socket;
+    }
+
     public getControlSocket(): Socket {
         return this._kRTPSession.controlSocket;
     }
 }
 
-class RTPWriteStream {
-    private _address: string;
-    private _port: number;
-    private _config: {}
+// class TRPReadable extends Readable {
+//     private _source: RTPSession 
 
-    public constructor(address: string, port: number, config: {}) {
+//     public constructor(options: ReadableOptions) {
+//         super(options);
+//     }
 
-    }
+//     public open(port: number) {
+//         this._source = new RTPSession(port);
+//     }
 
-    public connect() {
+//     private _read(size: number) {
+        
+//     }
+// }
 
-    }
+// class RTPWritable extends Writable {
+//     private _address: string;
+//     private _port: number;
+//     private _config: {}
 
-    public close() {
+//     public constructor(address: string, port: number, config: {}) {
 
-    }
-}
+//     }
 
-class RTPReadStream {
+//     public constructor(options: WritableOptions) {
+//         super(options)
+//     }
 
-}
+//     public connect(ip: string, port: number, config: {}) {
 
-export default RTPSession;
+//     }
+
+//     public close() {
+
+//     }
+// }
+
+// export { RTPWritable, TRPReadable };

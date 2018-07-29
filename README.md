@@ -19,6 +19,12 @@ TBA
 2. On Develop build source files into dists
 3. On Client and Server do git clone 
 
+# Data transfer
+```
+PCM streem: --------------------------->
+Client network:
+```
+
 # ToDo
 - [ ] Audio playback on a Server
 - [ ] Common networking stack

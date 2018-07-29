@@ -1,6 +1,5 @@
 import * as Fs from "fs";
 import * as PortAudio from "naudiodon";
-import { Writable, Readable } from "stream";
 
 interface IDeviceIndex {
     [i: number]: PortAudio.IDevice
@@ -66,7 +65,9 @@ class AudioStreamManager {
         });
     }
 
-    public start(souceInputId: number, sinkOutputId: number) {
+    public start(souceInputId: number) {
+        // this.stop();
+
         const writeStream = Fs.createWriteStream("rawAudio.raw");
 
         this._sourceInputDevice = this.getSourceInput(souceInputId);
@@ -76,6 +77,17 @@ class AudioStreamManager {
 
         this._sourceInputDevice.pipe(writeStream);
         this._sourceInputDevice.start();
+    }
+
+    public fromSource(sourceInputId: number) {
+        // this.stop();
+
+        this._sourceInputDevice = this.getSourceInput(sourceInputId);
+
+        this._sourceInputDevice.on("end", () => this.stop());
+        this._sourceInputDevice.on("error", console.error.bind(console));
+
+        return this._sourceInputDevice;
     }
 
     public stop() {

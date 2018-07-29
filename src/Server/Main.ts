@@ -15,6 +15,8 @@
 
 import { AddressInfo } from "net";
 
+import * as PortAudio from "naudiodon";
+
 const RTPSession2 = require("krtp").RTPSession;
 
 const session2 = new RTPSession2(1373);
@@ -24,7 +26,7 @@ session2.on("listening", () => {
     console.log(`UPD socket is listening ${address.address}:${address.port}`)
 })
 session2.on("message", (msg: any) => {
-  console.log(msg, msg.payload.toString("utf8"));
+  console.log(msg);
 });
 
 // setTimeout(() => {

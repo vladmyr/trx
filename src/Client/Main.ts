@@ -20,9 +20,9 @@ const session = new RTPSession(1373);
 // session.sendSR("127.0.0.2").catch((err: any) => {
 //   console.error(err);
 // });
-session.send(Buffer.from("Hello"), "localhost:1383")
+session.send(Buffer.from("Hello"), "pi.local")
   .catch((err: any) => console.trace(err))
-session.send(Buffer.from("world"), "localhost:1383")
+session.send(Buffer.from("world"), "pi.local")
   .catch((err: any) => console.trace(err))
 
 setTimeout(() => {

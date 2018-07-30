@@ -4,7 +4,7 @@
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
 declare module "naudiodon" {
-    type TSampleFormat = 8 | 16 | 24 | 32;
+    export type TSampleFormat = 8 | 16 | 24 | 32;
 
     export interface IDevice {
         id: number,

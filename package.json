@@ -6,6 +6,7 @@
   "dependencies": {
     "@types/node": "latest",
     "krtp": "^2.0.1",
+    "memfs": "^2.9.4",
     "naudiodon": "^0.4.7",
     "node-opus": "^0.3.0",
     "oclif": "^1.8.6",

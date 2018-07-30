@@ -50,7 +50,10 @@ class AudioStreamManager {
         })
     }
 
-    public getSinkOutput(id: number) {
+    public getSinkOutput(id: number, options: {
+        sampleFormat?: PortAudio.TSampleFormat,
+        sampleRate?: number
+    } = {}) {
         const device = AudioStreamManager._IdxDevices[id]
 
         if (typeof device == "undefined") {
@@ -59,8 +62,8 @@ class AudioStreamManager {
 
         return new PortAudio.AudioOutput({
             channelCount: 2,
-            sampleFormat: PortAudio.SampleFormat16Bit,
-            sampleRate: device.defaultSampleRate,
+            sampleFormat: options.sampleFormat || PortAudio.SampleFormat16Bit,
+            sampleRate: options.sampleRate || device.defaultSampleRate,
             deviceId: id
         });
     }

@@ -1,5 +1,5 @@
 import { Writable } from "stream";
-import AudioStreamManager from "../common/AudioStreamManager";
+import AudioStreamManager from "../Common/AudioStreamManager";
 
 const audioStreamManager = AudioStreamManager.GetInstance();
 

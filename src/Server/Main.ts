@@ -26,9 +26,11 @@ session2.on("listening", () => {
     console.log(`UPD socket is listening ${address.address}:${address.port}`)
 })
 session2.on("message", (msg: any) => {
-  console.log(msg);
+  console.log(msg.sequenceNumber, msg.timestamp, msg.payload.byteLength);
 });
 
-// setTimeout(() => {
-//   session.close();
-// }, 5000)
+session2.send(Buffer.from("A"))
+session2.send(Buffer.from("AB"))
+session2.send(Buffer.from("ABC"))
+session2.send(Buffer.from("ABCD"))
+session2.send(Buffer.from("ABCDE"))

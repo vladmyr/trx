@@ -15,6 +15,14 @@ class RTPSession {
         this._kRTPSession = new KRTPSession(port);
     }
 
+    public close(): void {
+        this._kRTPSession.close();
+    }
+
+    public on(eventName: string, handler: (...args: any[]) => void): void {
+        this._kRTPSession.on(eventName, handler);
+    }
+
     public getSocket(): Socket {
         return this._kRTPSession.socket;
     }
@@ -24,21 +32,51 @@ class RTPSession {
     }
 }
 
-// class TRPReadable extends Readable {
-//     private _source: RTPSession 
+class TRPReadable extends Readable {
+    private _source: RTPSession;
+    private _dataBuffer: any[] = [];
+    private _lowWaterMark: number;
 
-//     public constructor(options: ReadableOptions) {
-//         super(options);
-//     }
+    public constructor(lowWaterMark: number, highWaterMark: number) {
+        super({ highWaterMark });
 
-//     public open(port: number) {
-//         this._source = new RTPSession(port);
-//     }
+        this._lowWaterMark = lowWaterMark;
+    }
 
-//     private _read(size: number) {
+    public open(port: number) {
+        this._source = new RTPSession(port);
+        this._ondata();
+    }
+
+    public _read(size: number) {
         
-//     }
-// }
+    }
+
+    public _destroy(err: Error, callback: Function) {
+        this._source.close();
+
+        super._destroy(err, callback);
+    }
+
+    private _ondata() {
+        this._source.on("message", (chunk) => {
+            if (!this.push(chunk)) {
+                this.push(null);
+                this._clearDataBuffer();
+            }
+
+
+        })
+    }
+
+    private _clearDataBuffer() {
+        this._dataBuffer.slice(0);
+    }
+
+    private _pushDataBufferChunk(chunk: any) {
+
+    }
+}
 
 // class RTPWritable extends Writable {
 //     private _address: string;

@@ -1,5 +1,5 @@
 declare module "krtp" {
-    export type RTPMessage = {
+    export type TPacket = {
         csrc: any[],
         payload: Buffer,
         payloadType: number,

@@ -7,6 +7,7 @@ import {
 } from "stream";
 
 const KRTPSession = require("krtp").RTPSession;
+import { TPacket } from "krtp";
 
 class RTPSession {
     private _kRTPSession: typeof KRTPSession
@@ -32,15 +33,37 @@ class RTPSession {
     }
 }
 
+class DataBuffer {
+    private _buffer: Buffer;
+    private _bufferWriteOffset: number;
+    private _bufferLength: number;
+
+    public constructor(size: number) {
+        this._buffer = Buffer.allocUnsafe(size);
+        this._bufferLength = 0;
+        this._bufferWriteOffset = 0;
+    }
+
+    public write(buffer: Buffer) {
+        this._bufferWriteOffset += buffer.byteLength;
+        this._buffer.
+    }
+
+    public read(size: number = 1) {
+
+    }
+}
+
 class TRPReadable extends Readable {
     private _source: RTPSession;
-    private _dataBuffer: any[] = [];
-    private _lowWaterMark: number;
+    private _dataBuffer: Buffer;
+    private _dataBufferLength: number;
+    private _dataBufferWriteIndex: number;
 
     public constructor(lowWaterMark: number, highWaterMark: number) {
         super({ highWaterMark });
 
-        this._lowWaterMark = lowWaterMark;
+        this._dataBufferLength = lowWaterMark * 2;
     }
 
     public open(port: number) {
@@ -59,7 +82,7 @@ class TRPReadable extends Readable {
     }
 
     private _ondata() {
-        this._source.on("message", (chunk) => {
+        this._source.on("message", (chunk: TPacket) => {
             if (!this.push(chunk)) {
                 this.push(null);
                 this._clearDataBuffer();
@@ -69,11 +92,11 @@ class TRPReadable extends Readable {
         })
     }
 
-    private _clearDataBuffer() {
-        this._dataBuffer.slice(0);
+    private _clearDataBuffer(offset: number = 0) {
+        this._dataBuffer.slice(offset);
     }
 
-    private _pushDataBufferChunk(chunk: any) {
+    private _pushDataBufferChunk(chunk: TPacket) {
 
     }
 }
@@ -100,4 +123,4 @@ class TRPReadable extends Readable {
 //     }
 // }
 
-// export { RTPWritable, TRPReadable };
+export { DataBuffer };

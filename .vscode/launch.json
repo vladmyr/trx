@@ -30,6 +30,20 @@
             "outFiles": ["${workspaceFolder}/build/debug/client/**/*"],
             "sourceMaps": true,
             "preLaunchTask": "tsc"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "AVA Debug",
+            "program": "${workspaceRoot}/node_modules/ava-ts/profile.js",
+            "localRoot": "${workspaceRoot}",
+            "args": [
+                "--serial",
+                "${file}"
+            ],
+            "skipFiles": [
+                "<node_internals>/**/*.js"
+            ]
         }
     ]
 }

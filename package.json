@@ -23,7 +23,8 @@
   },
   "scripts": {
     "tsc:debug": "./node_modules/.bin/tsc -p tsconfig.debug.json",
-    "webpack:build": "./node_modules/.bin/webpack"
+    "webpack:build": "./node_modules/.bin/webpack",
+    "test": "ava-ts -v ./test/**/*.test.ts"
   },
   "bin": {
     "trx-cli": "./bin/run"

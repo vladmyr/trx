@@ -30,8 +30,6 @@ class DevicesCommand extends Command {
         const path = Path.resolve(__dirname, "../../../Sample/", fileName);
         const wavFile = Fs.readFileSync(path);
 
-        console.log(memFsfilePath)
-
         MemFs.writeFileSync(memFsfilePath, wavFile);
 
         const readStream = MemFs.createReadStream(memFsfilePath);

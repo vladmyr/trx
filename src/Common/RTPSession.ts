@@ -7,7 +7,9 @@ import {
 } from "stream";
 
 const KRTPSession = require("krtp").RTPSession;
-import { TPacket } from "krtp";
+
+// FIXME: ava-ts doesn't recognize *.d.ts files
+// import { TPacket } from "krtp";
 
 class RTPSession {
     private _kRTPSession: typeof KRTPSession
@@ -39,8 +41,8 @@ class DataBuffer {
     protected _bufferWriteIndex: number = 0;
     protected _bitDepth: number;    // FIXME: might not be needed
 
-    public constructor(byteLength: number, bitDepth: number = 16) {
-        this._buffer = Buffer.allocUnsafe(byteLength);
+    public constructor(size: number, bitDepth: number = 16) {
+        this._buffer = Buffer.allocUnsafe(size);
         this._bitDepth = bitDepth;
     }
 
@@ -52,12 +54,14 @@ class DataBuffer {
             throw new Error("DataBuffer overflow");
         } else if (writeCapacity === writeCapacityAppend) {
             buffer.copy(this._buffer, this._bufferWriteIndex);
-            this._bufferWriteIndex += buffer.byteLength;
+            this._bufferWriteIndex += buffer.length;
         } else {
             buffer.copy(this._buffer, this._bufferWriteIndex, 0, writeCapacityAppend);
             buffer.copy(this._buffer, 0, writeCapacityAppend + 1);
             this._bufferWriteIndex = buffer.length - writeCapacityAppend + 1;
         }
+
+        this._bufferWriteIndex = this._bufferWriteIndex % this._buffer.length;
     }
 
     public read(size: number = 1) {
@@ -142,7 +146,7 @@ class TRPReadable extends Readable {
     }
 
     private _ondata() {
-        this._source.on("message", (chunk: TPacket) => {
+        this._source.on("message", (chunk: any) => {
             if (!this.push(chunk)) {
                 this.push(null);
                 this._clearDataBuffer();
@@ -156,7 +160,7 @@ class TRPReadable extends Readable {
         this._dataBuffer.slice(offset);
     }
 
-    private _pushDataBufferChunk(chunk: TPacket) {
+    private _pushDataBufferChunk(chunk: any) {
 
     }
 }

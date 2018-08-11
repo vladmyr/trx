@@ -6,7 +6,7 @@ const BUFFER_BIT_DEPTH = 16;
 
 class DataBufferTest extends DataBuffer {
     public static CalcByteSize(length: number, bitDepth: TDataBufferBitDepth) {
-        return super._CalcByteSize(length, bitDepth);
+        return super._CalcByteSize(length, BUFFER_LENGTH);
     }
 
     public static GenDummyArray(
@@ -92,13 +92,12 @@ test("[DataBuffer] Multiple buffer writes", (t) => {
 });
 
 test("[DataBuffer] Single buffer write/read - half capacity", (t) => {
-    const bitDepth = 16;
     const startNumber = 0;
     const readWriteSize = BUFFER_LENGTH / 2;
 
-    const elementSize = DataBufferTest.CalcByteSize(1, bitDepth);
+    const elementSize = DataBufferTest.CalcByteSize(1, BUFFER_LENGTH);
     const dataBuffer = new DataBufferTest(BUFFER_LENGTH, BUFFER_BIT_DEPTH);
-    const expectedBuffer = DataBufferTest.GenDummyArray(bitDepth, readWriteSize, startNumber);
+    const expectedBuffer = DataBufferTest.GenDummyArray(BUFFER_LENGTH, readWriteSize, startNumber);
 
     dataBuffer.writeUint16Fluently(readWriteSize);
 
@@ -117,16 +116,14 @@ test("[DataBuffer] Single buffer write/read - half capacity", (t) => {
 })
 
 test("[DataBuffer] Single buffer write/read - full capacity", (t) => {
-    const bitDepth = 16;
-    const elementSize = DataBufferTest.CalcByteSize(1, bitDepth);
+    const elementSize = DataBufferTest.CalcByteSize(1, BUFFER_LENGTH);
 
     const dataBuffer = new DataBufferTest(BUFFER_LENGTH, BUFFER_BIT_DEPTH);
     const startNumber = 32769;
     const readWriteSize = BUFFER_LENGTH;
 
-    const expectedBuffer = DataBufferTest.GenDummyArray(bitDepth, readWriteSize, startNumber);
+    const expectedBuffer = DataBufferTest.GenDummyArray(BUFFER_LENGTH, readWriteSize, startNumber);
 
-    // dataBuffer2
     dataBuffer.writeUint16Fluently(readWriteSize, startNumber);
 
     t.deepEqual(dataBuffer.getIsBufferEmpty(), false);
@@ -144,11 +141,41 @@ test("[DataBuffer] Single buffer write/read - full capacity", (t) => {
     t.deepEqual(readBuffer, expectedBuffer);
 })
 
+test("[DataBuffer] Multiple sequential buffer writes/reads", async (t) => {
+    const elementSize = DataBufferTest.CalcByteSize(1, BUFFER_LENGTH);
 
-// test("[DataBuffer] Buffer filling without read", async () => {
+    const bufferLength = BUFFER_LENGTH * 2 + BUFFER_LENGTH / 2;
+    const dataBuffer = new DataBufferTest(BUFFER_LENGTH, BUFFER_BIT_DEPTH);
+    const startNumber = 32769;
 
-// });
+    const dummyBuffer = DataBufferTest.GenDummyArray(BUFFER_BIT_DEPTH, bufferLength, startNumber);
+    const bufferCheckBreakpoints = [{
+        readLength: 2,
+        writeBuffer: dummyBuffer.slice(0, 4 * elementSize),
+        expectedBuffer: dummyBuffer.slice(0, 2 * elementSize)
+    }, {
+        readLength: 8,
+        writeBuffer: dummyBuffer.slice(4 * elementSize, 10 * elementSize),
+        expectedBuffer: dummyBuffer.slice(2 * elementSize, 10 * elementSize)
+    }, {
+        readLength: 6,
+        writeBuffer: dummyBuffer.slice(10 * elementSize, 22 * elementSize),
+        expectedBuffer: dummyBuffer.slice(10 * elementSize, 16 * elementSize)
+    }, {
+        readLength: 12,
+        writeBuffer: dummyBuffer.slice(22 * elementSize, 30 * elementSize),
+        expectedBuffer: dummyBuffer.slice(16 * elementSize, 28 * elementSize)
+    }, {
+        readLength: 12,
+        writeBuffer: dummyBuffer.slice(30 * elementSize),
+        expectedBuffer: dummyBuffer.slice(28 * elementSize)
+    }]
 
-// test("[DataBuffer] Circular buffer filling", async () => {
+    bufferCheckBreakpoints.forEach((breakpoint) => {
+        dataBuffer.write(breakpoint.writeBuffer);
 
-// });
+        const buffer = dataBuffer.read(breakpoint.readLength);
+
+        t.deepEqual(buffer, breakpoint.expectedBuffer);
+    });
+});

@@ -64,15 +64,14 @@ class DataBuffer {
 
         if (writeCapacity < buffer.length) {
             throw new Error("DataBuffer overflow");
-        } else if (writeCapacity === writeCapacityAppend) {
+        } else if (buffer.length <= writeCapacityAppend) {
             buffer.copy(this._buffer, this._bufferWriteIndex);
-            this._bufferWriteIndex += buffer.length;
         } else {
             buffer.copy(this._buffer, this._bufferWriteIndex, 0, writeCapacityAppend);
-            buffer.copy(this._buffer, 0, writeCapacityAppend + 1);
-            this._bufferWriteIndex = buffer.length - writeCapacityAppend + 1;
+            buffer.copy(this._buffer, 0, writeCapacityAppend);
         }
 
+        this._bufferWriteIndex += buffer.length;
         this._bufferWriteIndex = this._bufferWriteIndex % this._buffer.length;
         this._isBufferEmpty = false;
     }
@@ -89,19 +88,18 @@ class DataBuffer {
 
         const readBuffer = Buffer.allocUnsafe(readSize);
         
-        if (readCapacity === readCapacityAppend) {
+        if (readSize <= readCapacityAppend) {
             this._buffer.copy(readBuffer, 0, this._bufferReadIndex, this._bufferReadIndex + readSize);
         } else {
             const readLengthFromHead = readCapacity - readCapacityAppend;
-            const readLengthFromTail = this._buffer.length - this._bufferReadIndex + 1;
+            const readLengthFromTail = this._buffer.length - this._bufferReadIndex;
 
-            this._buffer.copy(readBuffer, 0, this._bufferReadIndex, this._buffer.length);
-            this._buffer.copy(readBuffer, readLengthFromTail + 1, 0, readLengthFromHead);
+            this._buffer.copy(readBuffer, 0, this._bufferReadIndex);
+            this._buffer.copy(readBuffer, readLengthFromTail, 0, readLengthFromHead);
         }
 
         this._bufferReadIndex += readSize;
         this._bufferReadIndex = this._bufferReadIndex % this._buffer.length;
-
         this._isBufferEmpty = this._bufferReadIndex === this._bufferWriteIndex;
 
         return readBuffer;
@@ -113,17 +111,17 @@ class DataBuffer {
     }
 
     protected _calcReadCapacityAppend() {
-        return this._bufferWriteIndex == this._bufferReadIndex
+        return this._bufferWriteIndex === this._bufferReadIndex
             ? this._isBufferEmpty
                 ? 0
-                : this._buffer.length
+                : this._buffer.length - this._bufferWriteIndex
             : this._bufferReadIndex < this._bufferWriteIndex
                 ? this._bufferWriteIndex - this._bufferReadIndex
                 : this._buffer.length - this._bufferReadIndex;
     }
 
     protected _calcWriteCapacity() {
-        return this._bufferWriteIndex == this._bufferReadIndex
+        return this._bufferWriteIndex === this._bufferReadIndex
             ? this._isBufferEmpty
                 ? this._buffer.length
                 : 0
@@ -133,9 +131,13 @@ class DataBuffer {
     }
 
     protected _calcWriteCapacityAppend() {
-        return this._bufferWriteIndex > this._bufferReadIndex
-            ? this._buffer.length - this._bufferWriteIndex 
-            : this._calcWriteCapacity();
+        return this._bufferWriteIndex === this._bufferReadIndex
+            ? this._isBufferEmpty
+                ? this._buffer.length - this._bufferWriteIndex
+                : 0
+            : this._bufferWriteIndex > this._bufferReadIndex
+                ? this._buffer.length - this._bufferWriteIndex
+                : this._bufferReadIndex - this._bufferWriteIndex;
     }
 }
 

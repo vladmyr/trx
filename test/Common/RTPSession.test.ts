@@ -1,10 +1,41 @@
 import test from "ava";
-import { DataBuffer } from "../../src/Common/RTPSession";
+import { TDataBufferBitDepth, DataBuffer } from "../../src/Common/RTPSession";
 
-const BUFFER_SIZE = 16;
+const BUFFER_LENGTH = 16;
+const BUFFER_BIT_DEPTH = 16;
 
 class DataBufferTest extends DataBuffer {
+    public static CalcByteSize(length: number, bitDepth: TDataBufferBitDepth) {
+        return super._CalcByteSize(length, bitDepth);
+    }
+
+    public static GenDummyArray(
+        bitDepth: TDataBufferBitDepth, 
+        length: number, 
+        startNumber: number
+    ) {
+        const bufferByteSize = DataBufferTest._CalcByteSize(length, bitDepth);
+        const offsetIndexMultiplier = bufferByteSize / length;
+        const buffer = Buffer.allocUnsafe(bufferByteSize);
+
+        for (let i = 0; i < length; i++) {
+            const value = i + startNumber;
+            const index = i * offsetIndexMultiplier;
+
+            if (bitDepth === 8) {
+                buffer.writeUInt8(value, index);
+            } else if (bitDepth === 16) {
+                buffer.writeUInt16LE(value, index);
+            } else {
+                buffer.writeUInt32LE(value, index);
+            }
+        }
+
+        return buffer;
+    }
+
     public getBuffer() { return this._buffer; }
+    public getIsBufferEmpty() { return this._isBufferEmpty; }
     public getWriteIndex() { return this._bufferWriteIndex; }
     public getReadIndex() { return this._bufferReadIndex; }
     public calcReadCapacity() { return super._calcReadCapacity(); }
@@ -12,32 +43,107 @@ class DataBufferTest extends DataBuffer {
     public calcWriteCapacity() { return super._calcWriteCapacity(); }
     public calcWriteCapacityAppend() { return super._calcWriteCapacityAppend(); }
 
-    public writeFluently(size: number = 1) {
-        const buffer = Buffer.allocUnsafe(size);
+    public writeUint16Fluently(length: number = 1, startNumber: number = 0) {
+        return this._writeFluently(16, length, startNumber);
+    }
 
-        for (let i = 0; i < size; i++) {
-            buffer.writeInt8(i, i);
-        }
-
-        this.write(buffer);
+    private _writeFluently(
+        bitDepth: TDataBufferBitDepth, 
+        length: number, 
+        startNumber: number
+    ) {
+        this.write(DataBufferTest.GenDummyArray(bitDepth, length, startNumber));
     }
 }
 
 test("[DataBuffer] Single buffer write", (t) => {
-    const dataBuffer = new DataBufferTest(BUFFER_SIZE);
-    const dataBuffer2 = new DataBufferTest(BUFFER_SIZE);
+    const elementSize = DataBufferTest.CalcByteSize(1, BUFFER_BIT_DEPTH);
+    const dataBuffer = new DataBufferTest(BUFFER_LENGTH, BUFFER_BIT_DEPTH);
+    const dataBuffer2 = new DataBufferTest(BUFFER_LENGTH, BUFFER_BIT_DEPTH);
 
-    dataBuffer.writeFluently(4);
+    // dataBuffer
+    t.deepEqual(dataBuffer.getIsBufferEmpty(), true);
 
-    t.deepEqual(dataBuffer.getWriteIndex(), 4);
+    dataBuffer.writeUint16Fluently(4);
+
+    t.deepEqual(dataBuffer.getIsBufferEmpty(), false);
+    t.deepEqual(dataBuffer.getWriteIndex(), 4 * elementSize);
     t.deepEqual(dataBuffer.getReadIndex(), 0);
 
-    dataBuffer2.writeFluently(BUFFER_SIZE);
+    // dataBuffer2
+    t.deepEqual(dataBuffer2.getIsBufferEmpty(), true);
 
-    // FIXME: how to distinguish if buffer is full or empty?
+    dataBuffer2.writeUint16Fluently(BUFFER_LENGTH);
+
+    t.deepEqual(dataBuffer2.getIsBufferEmpty(), false);
     t.deepEqual(dataBuffer2.getWriteIndex(), 0);
     t.deepEqual(dataBuffer2.getReadIndex(), 0);
+});
+
+test("[DataBuffer] Multiple buffer writes", (t) => {
+    const elementSize = DataBufferTest.CalcByteSize(1, BUFFER_BIT_DEPTH);
+    const dataBuffer = new DataBufferTest(BUFFER_LENGTH, BUFFER_BIT_DEPTH);
+
+    dataBuffer.writeUint16Fluently(2);
+    dataBuffer.writeUint16Fluently(4, 2);
+    dataBuffer.writeUint16Fluently(8, 6);
+
+    t.deepEqual(dataBuffer.getWriteIndex(), 14 * elementSize);
+});
+
+test("[DataBuffer] Single buffer write/read - half capacity", (t) => {
+    const bitDepth = 16;
+    const startNumber = 0;
+    const readWriteSize = BUFFER_LENGTH / 2;
+
+    const elementSize = DataBufferTest.CalcByteSize(1, bitDepth);
+    const dataBuffer = new DataBufferTest(BUFFER_LENGTH, BUFFER_BIT_DEPTH);
+    const expectedBuffer = DataBufferTest.GenDummyArray(bitDepth, readWriteSize, startNumber);
+
+    dataBuffer.writeUint16Fluently(readWriteSize);
+
+    t.deepEqual(dataBuffer.getIsBufferEmpty(), false);
+    t.deepEqual(dataBuffer.getReadIndex(), 0);
+    t.deepEqual(dataBuffer.getWriteIndex(), readWriteSize * elementSize);
+    t.deepEqual(dataBuffer.calcReadCapacity(), readWriteSize * elementSize);
+
+    const readBuffer = dataBuffer.read(readWriteSize);
+
+    t.deepEqual(dataBuffer.getIsBufferEmpty(), true);
+    t.deepEqual(dataBuffer.getWriteIndex(), dataBuffer.getReadIndex());
+    t.deepEqual(dataBuffer.calcWriteCapacity(), BUFFER_LENGTH * elementSize);
+    t.deepEqual(dataBuffer.calcReadCapacity(), 0);
+    t.deepEqual(readBuffer, expectedBuffer);
 })
+
+test("[DataBuffer] Single buffer write/read - full capacity", (t) => {
+    const bitDepth = 16;
+    const elementSize = DataBufferTest.CalcByteSize(1, bitDepth);
+
+    const dataBuffer = new DataBufferTest(BUFFER_LENGTH, BUFFER_BIT_DEPTH);
+    const startNumber = 32769;
+    const readWriteSize = BUFFER_LENGTH;
+
+    const expectedBuffer = DataBufferTest.GenDummyArray(bitDepth, readWriteSize, startNumber);
+
+    // dataBuffer2
+    dataBuffer.writeUint16Fluently(readWriteSize, startNumber);
+
+    t.deepEqual(dataBuffer.getIsBufferEmpty(), false);
+    t.deepEqual(dataBuffer.getReadIndex(), 0);
+    t.deepEqual(dataBuffer.getWriteIndex(), 0);
+    t.deepEqual(dataBuffer.calcWriteCapacity(), 0);
+    t.deepEqual(dataBuffer.calcReadCapacity(), readWriteSize * elementSize);
+
+    const readBuffer = dataBuffer.read(readWriteSize);
+
+    t.deepEqual(dataBuffer.getIsBufferEmpty(), true);
+    t.deepEqual(dataBuffer.getWriteIndex(), dataBuffer.getReadIndex());
+    t.deepEqual(dataBuffer.calcWriteCapacity(), readWriteSize * elementSize);
+    t.deepEqual(dataBuffer.calcReadCapacity(), 0);
+    t.deepEqual(readBuffer, expectedBuffer);
+})
+
 
 // test("[DataBuffer] Buffer filling without read", async () => {
 

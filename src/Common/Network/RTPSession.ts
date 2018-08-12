@@ -1,12 +1,8 @@
 import { Socket } from "dgram";
-import { TPacket as TRTPPacket, RTPSession as KRTPSession } from "krtp";
-
-enum RTCP_MESSAGE {
-    START,
-    PAUSE,
-    STOP,
-    DESTROY
-}
+import { TPacket as TRTPPacket, 
+    RTPSession as KRTPSession,
+    RTPControlSR as KRTPControll
+} from "krtp";
 
 class RTPSession {
     private _kRTPSession: typeof KRTPSession

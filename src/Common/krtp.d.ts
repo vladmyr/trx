@@ -9,4 +9,5 @@ declare module "krtp" {
     }
 
     export const RTPSession: any;
+    export const RTPControlSR: any;
 }

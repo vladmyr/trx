@@ -148,34 +148,42 @@ test("[DataBuffer] Multiple sequential buffer writes/reads", async (t) => {
     const dataBuffer = new DataBufferTest(BUFFER_LENGTH, BUFFER_BIT_DEPTH);
     const startNumber = 32769;
 
-    const dummyBuffer = DataBufferTest.GenDummyArray(BUFFER_BIT_DEPTH, bufferLength, startNumber);
+    const writeBuffer = DataBufferTest.GenDummyArray(BUFFER_BIT_DEPTH, bufferLength, startNumber);
+    const readBuffer = Buffer.allocUnsafe(bufferLength * elementSize);
+    
+    let readBufferWriteIndex = 0;
+    
     const bufferCheckBreakpoints = [{
         readLength: 2,
-        writeBuffer: dummyBuffer.slice(0, 4 * elementSize),
-        expectedBuffer: dummyBuffer.slice(0, 2 * elementSize)
+        writeBuffer: writeBuffer.slice(0, 4 * elementSize),
+        expectedBuffer: writeBuffer.slice(0, 2 * elementSize)
     }, {
         readLength: 8,
-        writeBuffer: dummyBuffer.slice(4 * elementSize, 10 * elementSize),
-        expectedBuffer: dummyBuffer.slice(2 * elementSize, 10 * elementSize)
+        writeBuffer: writeBuffer.slice(4 * elementSize, 10 * elementSize),
+        expectedBuffer: writeBuffer.slice(2 * elementSize, 10 * elementSize)
     }, {
         readLength: 6,
-        writeBuffer: dummyBuffer.slice(10 * elementSize, 22 * elementSize),
-        expectedBuffer: dummyBuffer.slice(10 * elementSize, 16 * elementSize)
+        writeBuffer: writeBuffer.slice(10 * elementSize, 22 * elementSize),
+        expectedBuffer: writeBuffer.slice(10 * elementSize, 16 * elementSize)
     }, {
         readLength: 12,
-        writeBuffer: dummyBuffer.slice(22 * elementSize, 30 * elementSize),
-        expectedBuffer: dummyBuffer.slice(16 * elementSize, 28 * elementSize)
+        writeBuffer: writeBuffer.slice(22 * elementSize, 30 * elementSize),
+        expectedBuffer: writeBuffer.slice(16 * elementSize, 28 * elementSize)
     }, {
         readLength: 12,
-        writeBuffer: dummyBuffer.slice(30 * elementSize),
-        expectedBuffer: dummyBuffer.slice(28 * elementSize)
+        writeBuffer: writeBuffer.slice(30 * elementSize),
+        expectedBuffer: writeBuffer.slice(28 * elementSize)
     }]
 
     bufferCheckBreakpoints.forEach((breakpoint) => {
         dataBuffer.write(breakpoint.writeBuffer);
 
         const buffer = dataBuffer.read(breakpoint.readLength);
+        buffer.copy(readBuffer, readBufferWriteIndex);
+        readBufferWriteIndex += buffer.length;
 
         t.deepEqual(buffer, breakpoint.expectedBuffer);
     });
+
+    t.deepEqual(writeBuffer, readBuffer);
 });

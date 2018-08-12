@@ -7,4 +7,6 @@ declare module "krtp" {
         ssrc: number,
         timestamp: number
     }
+
+    export const RTPSession: any;
 }

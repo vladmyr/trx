@@ -1,21 +1,24 @@
 import { Socket } from "dgram";
-import { 
-    Readable, 
-    ReadableOptions,
-    Writable, 
-    WritableOptions
-} from "stream";
+import { Readable } from "stream";
 
-const KRTPSession = require("krtp").RTPSession;
+import { TPacket as TRTPPacket, RTPSession as KRTPSession } from "krtp";
 
-// FIXME: ava-ts doesn't recognize *.d.ts files
-// import { TPacket } from "krtp";
+enum CONTROL_COMMAND {
+    START,
+    PAUSE,
+    STOP,
+    DESTROY
+}
 
 class RTPSession {
     private _kRTPSession: typeof KRTPSession
 
     public constructor(port: number) {
         this._kRTPSession = new KRTPSession(port);
+    }
+
+    public getSession() {
+        return this._kRTPSession;
     }
 
     public close(): void {
@@ -76,9 +79,7 @@ class DataBuffer {
         this._isBufferEmpty = false;
     }
 
-    public read(length: number = 1) {
-        const elementSize = DataBuffer._CalcByteSize(1, this._bitDepth);
-        const readSize = elementSize * length;
+    public readBytes (readSize: number = 1) {
         const readCapacity = this._calcReadCapacity();
         const readCapacityAppend = this._calcReadCapacityAppend();
 
@@ -103,6 +104,26 @@ class DataBuffer {
         this._isBufferEmpty = this._bufferReadIndex === this._bufferWriteIndex;
 
         return readBuffer;
+    }
+
+    public read(length: number = 1) {
+        const elementSize = DataBuffer._CalcByteSize(1, this._bitDepth);
+        const byteSize = elementSize * length;
+        return this.readBytes(byteSize);
+    }
+
+    public reset() {
+        this._bufferWriteIndex = 0;
+        this._bufferReadIndex = 0;
+        this._isBufferEmpty = true;
+    }
+
+    public getBufferedLength() {
+        return Math.floor(this._calcReadCapacity() / DataBuffer._CalcByteSize(1, this._bitDepth));
+    }
+
+    public getBufferedByteLength() {
+        return this._calcReadCapacity();
     }
 
     protected _calcReadCapacity() {
@@ -141,73 +162,60 @@ class DataBuffer {
     }
 }
 
-class TRPReadable extends Readable {
-    private _source: RTPSession;
-    private _dataBuffer: Buffer;
-    private _dataBufferLength: number;
-    private _dataBufferWriteIndex: number;
 
-    public constructor(lowWaterMark: number, highWaterMark: number) {
-        super({ highWaterMark });
+/**
+ * TODO: search for more elegant solution
+ */
+class RTPReadable<T extends NodeJS.WritableStream> {
+    protected _source: RTPSession;
+    protected _dataBuffer: DataBuffer;
+    protected _readable: Readable;
+    protected _destination: NodeJS.WritableStream;
+    protected _lowWaterMark: number;
 
-        this._dataBufferLength = lowWaterMark * 2;
-    }
-
-    public open(port: number) {
+    public constructor(port: number, destination: T, lowWaterMark: number = 24000, highWaterMark: number = 48000) {
+        this._destination = destination;
+        this._lowWaterMark = lowWaterMark;
+        this._dataBuffer = new DataBuffer(highWaterMark);
         this._source = new RTPSession(port);
-        this._ondata();
+        this._readable = new Readable({
+            highWaterMark: lowWaterMark,
+            objectMode: false,
+            read: this._readDataBuffer(this._dataBuffer),
+        });
+        this._readable.pause();
+        this._bufferSource();
     }
 
-    public _read(size: number) {
-        
-    }
-
-    public _destroy(err: Error, callback: Function) {
+    protected _destroy(err: Error, callback: Function) {
         this._source.close();
+        this._dataBuffer.reset();
+        this._readable.destroy(err);
 
-        super._destroy(err, callback);
     }
 
-    private _ondata() {
-        this._source.on("message", (chunk: any) => {
-            if (!this.push(chunk)) {
-                this.push(null);
-                this._clearDataBuffer();
+    protected _bufferSource() {
+        this._source.on("message", (packet: TRTPPacket) => {
+            // TODO: ensure correct packet write order
+            this._dataBuffer.write(packet.payload);
+
+            if (this._readable.isPaused()
+                && this._dataBuffer.getBufferedByteLength() >= this._lowWaterMark * 4
+                && typeof this._destination !== "undefined"
+            ) {
+                this._readable.pipe(this._destination);
             }
-
-
-        })
+        });
     }
 
-    private _clearDataBuffer(offset: number = 0) {
-        this._dataBuffer.slice(offset);
-    }
-
-    private _pushDataBufferChunk(chunk: any) {
-
+    protected _readDataBuffer(dataBuffer: DataBuffer) {
+        return function (size?: number) {
+            // @ts-ignore
+            const readable: Readable = this;
+            const buffer = dataBuffer.readBytes(size);
+            readable.push(buffer);
+        }
     }
 }
 
-// class RTPWritable extends Writable {
-//     private _address: string;
-//     private _port: number;
-//     private _config: {}
-
-//     public constructor(address: string, port: number, config: {}) {
-
-//     }
-
-//     public constructor(options: WritableOptions) {
-//         super(options)
-//     }
-
-//     public connect(ip: string, port: number, config: {}) {
-
-//     }
-
-//     public close() {
-
-//     }
-// }
-
-export { TDataBufferBitDepth, DataBuffer };
+export { TDataBufferBitDepth, DataBuffer, RTPReadable };

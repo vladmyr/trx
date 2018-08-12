@@ -1,16 +1,17 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
+    "allowJs": true,
     "alwaysStrict": true,
     "outDir": "./build/release",
     "module": "commonjs",
     "target": "es6",
     "sourceMap": true,
     "inlineSources": true,
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "noImplicitReturns": true,
     "noImplicitThis": true,
-    "removeComments": true
+    "removeComments": true,
   },
   "exclude": [
     "node_modules",

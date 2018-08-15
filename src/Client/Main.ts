@@ -1,20 +1,13 @@
-// import { Writable } from "stream";
-// import AudioStreamManager from "../Common/AudioStreamManager";
+import AudioStreamManager from "../Common/AudioStreamManager";
+import RTPSession from "../Common/Network/RTPSession";
+import RTPWritable from "../Common/Network/RTPWritable";
 
-// const audioStreamManager = AudioStreamManager.GetInstance();
+const audioStreamManager = AudioStreamManager.GetInstance();
 
-const RTPSession = require("krtp").RTPSession;
-const session = new RTPSession(1373);
+const session = new RTPSession(1373, "192.168.1.2");
 
-session.on("message", (msg: any) => {
-  console.log(msg, msg.payload.toString("utf8"));
-});
+const audioReadableStream: any = audioStreamManager.getSourceInput(21);
+const rtpWritable = new RTPWritable(session);
 
-session.send(Buffer.from("Hello"))
-  .catch((err: any) => console.trace(err))
-session.send(Buffer.from("world"))
-  .catch((err: any) => console.trace(err))
-
-setTimeout(() => {
-  session.close();
-}, 5000)
+audioReadableStream.pipe(rtpWritable);
+audioReadableStream.start();

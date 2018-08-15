@@ -10,7 +10,7 @@ const speaker = new Speaker({
 });
 
 const session = new RTPSession(1373);
-const rtpReadable = new RTPReadable(session);
+// const rtpReadable = new RTPReadable(session);
 
 session.getSocket().on("close", () => console.log("close"));
 session.getSocket().on("listening", () => console.log("listening"));

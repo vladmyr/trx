@@ -1,6 +1,6 @@
 import test from "ava";
 import { Writable } from "stream";
-import RTPReadable from "../../../src/Common/RTP/RTPReadable";
+import RTPReadable from "../../../src/Common/Network/RTPReadable";
 
 class RTPReadableTest<T extends NodeJS.WritableStream> extends RTPReadable<T> {
     public static LogWritable(objectMode: boolean = false) {

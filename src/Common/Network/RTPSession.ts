@@ -7,8 +7,8 @@ import { TPacket as TRTPPacket,
 class RTPSession {
     private _kRTPSession: typeof KRTPSession
 
-    public constructor(port: number) {
-        this._kRTPSession = new KRTPSession(port);
+    public constructor(port: number, address?: string) {
+        this._kRTPSession = new KRTPSession(port, address);
     }
 
     public getSession() {

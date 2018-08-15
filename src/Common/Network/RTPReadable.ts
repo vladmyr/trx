@@ -6,18 +6,20 @@ import { TPacket as TRTPPacket, RTPSession as KRTPSession } from "krtp";
 /**
  * TODO: search for more elegant solution
  */
-class RTPReadable<T extends NodeJS.WritableStream> {
+class RTPReadable {
     protected _source: RTPSession;
     protected _dataBuffer: DataBuffer;
     protected _readable: Readable;
     protected _destination: NodeJS.WritableStream;
     protected _lowWaterMark: number;
 
-    public constructor(port: number, destination: T, lowWaterMark: number = 24000, highWaterMark: number = 48000) {
+    public constructor(port: number, destination: any, lowWaterMark: number = 24000, highWaterMark: number = 48000) {
         this._destination = destination;
         this._lowWaterMark = lowWaterMark;
         this._dataBuffer = new DataBuffer(highWaterMark);
-        this._source = new RTPSession(port);
+        
+        this._instantiateSession(port);
+
         this._readable = new Readable({
             highWaterMark: lowWaterMark,
             objectMode: false,
@@ -32,6 +34,10 @@ class RTPReadable<T extends NodeJS.WritableStream> {
         this._dataBuffer.reset();
         this._readable.destroy(err);
 
+    }
+
+    protected _instantiateSession(port: number) {
+        this._source = new RTPSession(port);
     }
 
     protected _bufferSource() {

@@ -12,12 +12,10 @@ class RTPWritable extends Writable {
         this._session = session;
     }
 
-    public _write(chunk: Buffer, _: string, done: Function) {
+    public _write(chunk: Uint8Array, _: string, done: Function) {
         console.log("[RTPWritable] Send", chunk.byteLength, chunk)
-        setTimeout(() => {
-            this._session.getSession().send(chunk);
-            done();
-        }, 1000);
+        this._session.getSession().send(Buffer.from(chunk));
+        done();
     }
 }
 

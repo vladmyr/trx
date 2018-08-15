@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "CLI",
             "program": "${workspaceFolder}/src/CLI/Main.ts",
-            "outFiles": ["${workspaceFolder}/build/debug/src/CLI/**/*"],
+            "outFiles": ["${workspaceFolder}/build/debug/CLI/**/*"],
             "sourceMaps": true,
             "preLaunchTask": "tsc"
         },
@@ -18,7 +18,7 @@
             "request": "launch",
             "name": "Server",
             "program": "${workspaceFolder}/src/Server/Main.ts",
-            "outFiles": ["${workspaceFolder}/build/debug/src/Server/**/*"],
+            "outFiles": ["${workspaceFolder}/build/debug/Server/**/*"],
             "sourceMaps": true,
             "preLaunchTask": "tsc"
         },
@@ -27,7 +27,7 @@
             "request": "launch",
             "name": "Client",
             "program": "${workspaceFolder}/src/Client/Main.ts",
-            "outFiles": ["${workspaceFolder}/build/debug/src/Client/**/*"],
+            "outFiles": ["${workspaceFolder}/build/debug/Client/**/*"],
             "sourceMaps": true,
             "preLaunchTask": "tsc"
         },

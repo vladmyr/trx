@@ -4,7 +4,7 @@ import RTPWritable from "../Common/Network/RTPWritable";
 
 const audioStreamManager = AudioStreamManager.GetInstance();
 
-const session = new RTPSession(1373, "192.168.1.2");
+const session = new RTPSession(1373, "pi.local");
 
 const audioReadableStream: any = audioStreamManager.getSourceInput(21);
 const rtpWritable = new RTPWritable(session);

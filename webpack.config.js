@@ -9,21 +9,20 @@ const configCommon = {
     output: {
         filename: "[name].js"
     },
+    resolve: {
+        extensions: [".ts", ".tsx", ".js"]
+    },
     module: {
         rules: [{
-            test: /\.ts$/,
+            test: /\.tsx?$/,
             use: "ts-loader",
+            include: [
+                Path.resolve(__dirname, "src", "Common")
+            ],
             exclude: [
                 Path.resolve(__dirname, "node_modules")
             ]
         }]
-    }
-}
-
-const configCLI = {
-    entry: "./src/CLI/Main.ts",
-    output: {
-        path: Path.resolve(__dirname, "build", "release", "cli")
     }
 }
 
@@ -67,7 +66,6 @@ const buildEntryConfig = (entryConfig) => {
 }
 
 module.exports = [
-    configServer,
-    configClient,
-    configCLI
+    // configServer,
+    configClient
 ].map(buildEntryConfig)

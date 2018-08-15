@@ -15,7 +15,13 @@ class RTPWritable extends Writable {
     public _write(chunk: Uint8Array, _: string, done: Function) {
         const buffer = Buffer.from(chunk);
         console.log("[RTPWritable] Send", chunk.byteLength, buffer)
-        this._session.send(buffer);
+
+        try {
+            this._session.send(buffer);
+        } catch(e) {
+            console.error(e);
+        }
+        
         done();
     }
 }

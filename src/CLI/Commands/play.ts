@@ -5,7 +5,7 @@ import AudioStreamManager from "../../Common/AudioStreamManager";
 
 const MemFs = require("memfs").fs;
 
-class DevicesCommand extends Command {
+class PlayCommand extends Command {
     static audioStreamManager = AudioStreamManager.GetInstance();
     static description = "list audio devices"
     static examples = [
@@ -19,22 +19,22 @@ class DevicesCommand extends Command {
     }
 
     async run() {
-        const { flags } = this.parse(DevicesCommand);
+        const { flags } = this.parse(PlayCommand);
 
         const id = Number.parseInt(flags.id) || 0;
         const rate = flags.rate || 44100;
         const format = flags.format || 16;
 
-        const fileName = "ChillingMusic.wav";
+        const fileName = "audio.raw";
         const memFsfilePath = Path.join("/", fileName);
-        const path = Path.resolve(__dirname, "../../../Sample/", fileName);
-        const wavFile = Fs.readFileSync(path);
+        const path = Path.resolve(__dirname, "../../../../Sample/", fileName);
+        const rawAudioFile = Fs.readFileSync(path);
 
-        MemFs.writeFileSync(memFsfilePath, wavFile);
+        MemFs.writeFileSync(memFsfilePath, rawAudioFile);
 
         const readStream = MemFs.createReadStream(memFsfilePath);
 
-        const output: any = DevicesCommand.audioStreamManager.getSinkOutput(id);
+        const output: any = PlayCommand.audioStreamManager.getSinkOutput(id);
 
         output.on("end", () => output.end());
         readStream.pipe(output);
@@ -42,4 +42,4 @@ class DevicesCommand extends Command {
     }
 }
 
-export default DevicesCommand;
+export default PlayCommand;

@@ -68,5 +68,6 @@ const buildEntryConfig = (entryConfig) => {
 
 module.exports = [
     configServer,
-    configClient
+    configClient,
+    configCLI
 ].map(buildEntryConfig)

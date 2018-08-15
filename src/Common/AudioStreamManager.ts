@@ -45,7 +45,7 @@ class AudioStreamManager {
         return new PortAudio.AudioInput({
             channelCount: 2,
             sampleFormat: PortAudio.SampleFormat16Bit,
-            sampleRate: device.defaultSampleRate,
+            sampleRate: 44100,
             deviceId: id
         })
     }

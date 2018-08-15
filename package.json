@@ -35,7 +35,8 @@
     "/src/Common"
   ],
   "oclif": {
-    "commands": "./src/CLI/Commands",
+    "//": "commands: ./build/debug/CLI/Commands",
+    "commands": "./build/debug/CLI/Commands",
     "bin": "trx-cli",
     "plugins": [
       "@oclif/plugin-help"

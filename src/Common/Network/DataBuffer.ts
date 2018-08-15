@@ -66,6 +66,13 @@ class DataBuffer {
         return readBuffer;
     }
 
+    public readMaxBytes(readMaxSize: number) {
+        const readCapacity = this._calcReadCapacity();
+        const readSize = Math.min(readCapacity, readMaxSize);
+
+        return this.readBytes(readSize);
+    }
+
     public read(length: number = 1) {
         const elementSize = DataBuffer._CalcByteSize(1, this._bitDepth);
         const byteSize = elementSize * length;

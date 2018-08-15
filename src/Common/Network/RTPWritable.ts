@@ -4,21 +4,20 @@ import RTPSession from "./RTPSession";
 class RTPWritable extends Writable {
     protected _session: RTPSession;
 
-    public constructor(port: number, address?: string) {
+    public constructor(session: RTPSession) {
         super({ 
             objectMode: false, 
             decodeStrings: false 
         });
-        this._instantiateSession(port, address);
+        this._session = session;
     }
 
     public _write(chunk: Buffer, _: string, done: Function) {
-        this._session.getSession().send(chunk);
-        done();
-    }
-
-    protected _instantiateSession(port: number, address?: string) {
-        this._session = new RTPSession(port, address);
+        console.log("[RTPWritable] Send", chunk.byteLength, chunk)
+        setTimeout(() => {
+            this._session.getSession().send(chunk);
+            done();
+        }, 1000);
     }
 }
 

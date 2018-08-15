@@ -13,13 +13,12 @@ class RTPReadable {
     protected _destination: NodeJS.WritableStream;
     protected _lowWaterMark: number;
 
-    public constructor(port: number, destination: any, lowWaterMark: number = 24000, highWaterMark: number = 48000) {
+    // public constructor(port: number, destination: any, lowWaterMark: number = 24000, highWaterMark: number = 48000, ) {
+    public constructor(rtpSession: RTPSession, destination: any, lowWaterMark: number = 24000, highWaterMark: number = 48000, ) {
         this._destination = destination;
         this._lowWaterMark = lowWaterMark;
         this._dataBuffer = new DataBuffer(highWaterMark);
-        
-        this._instantiateSession(port);
-
+        this._source = rtpSession;
         this._readable = new Readable({
             highWaterMark: lowWaterMark,
             objectMode: false,
@@ -36,17 +35,13 @@ class RTPReadable {
 
     }
 
-    protected _instantiateSession(port: number) {
-        this._source = new RTPSession(port);
-    }
-
     protected _bufferSource() {
         this._source.on("message", (packet: TRTPPacket) => {
             // TODO: ensure correct packet write order
             this._dataBuffer.write(packet.payload);
 
             if (this._readable.isPaused()
-                && this._dataBuffer.getBufferedByteLength() >= this._lowWaterMark * 4
+                && this._dataBuffer.getBufferedByteLength() >= this._lowWaterMark
                 && typeof this._destination !== "undefined"
             ) {
                 this._readable.pipe(this._destination);

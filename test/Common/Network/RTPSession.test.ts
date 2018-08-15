@@ -1,6 +1,6 @@
 
 import test from "ava";
-import DataBuffer, { TDataBufferBitDepth } from "../../../src/Common/RTP/DataBuffer";
+import DataBuffer, { TDataBufferBitDepth } from "../../../src/Common/Network/DataBuffer";
 
 const BUFFER_LENGTH = 16;
 const BUFFER_BIT_DEPTH = 16;

@@ -15,6 +15,7 @@ const rtpReadable = new RTPReadable(session);
 session.getSocket().on("close", () => console.log("close"));
 session.getSocket().on("listening", () => console.log("listening"));
 session.getSocket().on("error", () => console.log("error"));
+session.getSocket().on("message", () => console.log("message"));
 session.on("message", (msg) => {
   console.log("[RTPSession]", msg);
 });

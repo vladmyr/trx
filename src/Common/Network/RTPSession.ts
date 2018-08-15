@@ -5,10 +5,16 @@ import { TPacket as TRTPPacket,
 } from "krtp";
 
 class RTPSession {
+    private _address: string;
     private _kRTPSession: typeof KRTPSession
 
-    public constructor(port: number, address?: string) {
-        this._kRTPSession = new KRTPSession(port, address);
+    public constructor(port: number, address: string = "127.0.0.1") {
+        this._address = address;
+        this._kRTPSession = new KRTPSession(port);
+    }
+
+    public send(buffer: Buffer, timestamp?: number) {
+        this._kRTPSession.send(buffer, this._address, timestamp);
     }
 
     public getSession() {

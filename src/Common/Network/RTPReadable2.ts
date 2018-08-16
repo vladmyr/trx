@@ -27,7 +27,7 @@ class RTPReadable extends Readable {
 
     protected _buffer() {
         this._session.on("message", (packet: TRTPPacket) => {
-            console.log("[RTPReadable] Message", packet.payload)
+            // console.log("[RTPReadable] Message", packet.payload)
 
             // if (this._isInitialBuffering) {
             //     this._dataBuffer.write(packet.payload);

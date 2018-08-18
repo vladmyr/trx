@@ -1,9 +1,10 @@
 // import { createSocket, Socket } from "dgram";
 import { Server, Socket, createConnection, createServer } from "net";
-import { TPacket as TRTPPacket, 
-    RTPSession as KRTPSession,
-    RTPControlSR as KRTPControll
-} from "krtp";
+import { prototype } from "stream";
+// import { TPacket as TRTPPacket, 
+//     RTPSession as KRTPSession,
+//     RTPControlSR as KRTPControll
+// } from "krtp";
 
 
 // class Server {
@@ -39,7 +40,7 @@ import { TPacket as TRTPPacket,
 
 class TCPServer {
     protected _server: Server;
-    protected _client: Socket;
+    protected _socket: Socket;
 
     public constructor(port: number) {
         this._server = createServer();
@@ -49,8 +50,35 @@ class TCPServer {
             console.log(`UDP server listening ${addressInfo.address}:${addressInfo.port}`);
         });
 
-        this._server.on("connection", (client: Socket) => {
-            this._client = client;
+        this._server.on("connection", (socket: Socket) => {
+            console.log("connection")
+
+            this._socket = socket;
+
+            this._socket.on("close", () => {
+                console.log("close")
+            })
+            this._socket.on("connect", () => {
+                console.log("connect")
+            })
+            this._socket.on("data", (data) => {
+                console.log("data", data)
+            })
+            this._socket.on("drain", () => {
+                console.log("drain")
+            })
+            this._socket.on("end", () => {
+                console.log("end")
+            })
+            this._socket.on("error", () => {
+                console.log("error")
+            })
+            this._socket.on("lookup", () => {
+                console.log("loopup")
+            })
+            this._socket.on("timeout", () => {
+                console.log("timeout")
+            })
         });
 
         this._server.on("error", (ex) => {
@@ -63,24 +91,83 @@ class TCPServer {
 
         this._server.listen(port);
     }
+
+    public getServer() { return this._server; }
+    public getSocket() { return this._socket; }
+    public async close() { 
+        this._socket.end(); 
+        return new Promise((resolve) => {
+            this._server.close(resolve);
+        })
+    }
 }
 
 class TCPClient {
-    protected _client: Socket;
+    protected _socket: Socket;
 
     public constructor(port: number, address: string = "127.0.0.1") {
-        this._client = new Socket();
+        this._socket = new Socket();
 
-        this._client.on("close", () => {})
-        this._client.on("connect", () => {})
-        this._client.on("data", () => {})
-        this._client.on("drain", () => {})
-        this._client.on("end", () => {})
-        this._client.on("error", () => {})
-        this._client.on("lookup", () => {})
-        this._client.on("timeout", () => {})
+        this._socket.on("close", () => {
+            console.log("close")
+        })
+        this._socket.on("connect", () => {
+            console.log("connect")
+        })
+        this._socket.on("data", (data) => {
+            console.log("data", data)
+        })
+        this._socket.on("drain", () => {
+            console.log("drain")
+        })
+        this._socket.on("end", () => {
+            console.log("end")
+        })
+        this._socket.on("error", () => {
+            console.log("error")
+        })
+        this._socket.on("lookup", () => {
+            console.log("loopup")
+        })
+        this._socket.on("timeout", () => {
+            console.log("timeout")
+        })
 
-        this._client.connect(port, address);
+        this._socket.connect(port, address);
+    }
+
+    public getSocket() { return this._socket; }
+    public close() { this._socket.end(); }
+}
+
+class TCPTransport {
+    protected _port: number;
+    protected _address: string;
+    protected _server: TCPServer;
+    protected _client: TCPClient;
+
+    public constructor(port: number, address: string = "127.0.0.1") {
+        this._port = port;
+        this._address = address;
+        this._server = new TCPServer(port);
+        this._client = new TCPClient(port, address);
+    }
+
+    public getServer() { return this._server; }
+    public getClient() { return this._client; }
+
+    public getSocket() { 
+        // FIXME: need more universal solution
+        if (this._address == "127.0.0.1") {
+            return this._server.getSocket();
+        } else {
+            return this._client.getSocket(); 
+        }
+    }
+
+    public async close() {
+        this._client.close();
+        await this._server.close();
     }
 }
 
@@ -88,37 +175,41 @@ class RTPSession {
     private _port: number;
     private _address: string;
     // private _kRTPSession: typeof KRTPSession
-    private _server: Server;
+    private _tcpTransport: TCPTransport;
 
     public constructor(port: number, address: string = "127.0.0.1") {
         this._port = port;
         this._address = address;
         // this._kRTPSession = new KRTPSession(port);
-        this._server = new Server(port);
+        this._tcpTransport = new TCPTransport(port, address);
     }
 
     public send(buffer: Buffer) {
-        this._server.getSocket().send(buffer, this._port, this._address, (err, bytes) => {
-            console.log(err, bytes);
-        });
+        // this._server.getSocket().send(buffer, this._port, this._address, (err, bytes) => {
+        //     console.log(err, bytes);
+        // });
+
+        this._tcpTransport.getSocket().write(buffer, (...args) => {
+            console.log("sent", args)
+        })
     }
 
     // public getSession() {
     //     return this._kRTPSession;
     // }
 
-    public close(): void {
-        this._server.getSocket().close();
+    public async close() {
+        await this._tcpTransport.close();
     }
 
     public on(eventName: string, handler: (...args: any[]) => void): void {
         // this._kRTPSession.on(eventName, handler);
-        this._server.getSocket().on(eventName, handler);
+        // this._tcpTransport.getSocket().on(eventName, handler);
     }
 
     public getSocket(): Socket {
         // return this._kRTPSession.socket;
-        return this._server.getSocket();
+        return this._tcpTransport.getSocket();
     }
 
     // public getControlSocket(): Socket {

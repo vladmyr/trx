@@ -17,17 +17,6 @@ class RTPWritableTest extends RTPWritable {
 class RTPReadableTest extends RTPReadable {
 }
 
-class SteadyConsumer extends Writable {
-    public constructor() {
-        super({ highWaterMark: CONSUMPTION_SPEED });
-    }
-
-    public _write(chunk: Buffer, _: string, done: Function) {
-        console.log(`${Date.now()}`, chunk.length, chunk);
-        done();
-    }
-}
-
 test.only("[RTPWritable] Read source from file and pipe it to network", async (t) => {
     return new Promise((resolve) => {
         const rtpSession = new RTPSession(PORT);
@@ -36,40 +25,32 @@ test.only("[RTPWritable] Read source from file and pipe it to network", async (t
         const audioFile = Fs.readFileSync(audioFilepath);
         const audioReadStream = Fs.createReadStream(audioFilepath);
 
-        rtpSession.getSocket().on("close", () => console.log("close"));
-        rtpSession.getSocket().on("listening", () => console.log("listening"));
-        rtpSession.getSocket().on("error", () => console.log("error"));
-        rtpSession.getSocket().on("message", (msg) => {
-            console.log("[RTPSession]", msg);
+        const destinationBuffer = Buffer.allocUnsafe(audioFile.byteLength);
+
+        let count = 0;
+        let transferByteLength = 0;
+        const writable = new Writable({
+            write(chunk: Buffer, _: string, callback: Function) {
+                console.log(chunk.byteLength, chunk);
+
+                chunk.copy(destinationBuffer, transferByteLength);
+
+                count++;
+                transferByteLength += chunk.byteLength;
+
+                callback();
+
+                if (count === 10) {
+                    resolve();
+                }
+            }
         })
-
-        // const destinationBuffer = Buffer.allocUnsafe(audioFile.byteLength);
-
-        // let count = 0;
-        // let transferByteLength = 0;
-        // const steadyConsumer = new SteadyConsumer();
-        // const writable = new Writable({
-        //     write(chunk: Buffer, _: string, callback: Function) {
-        //         console.log(chunk.byteLength, chunk);
-
-        //         chunk.copy(destinationBuffer, transferByteLength);
-
-        //         count++;
-        //         transferByteLength += chunk.byteLength;
-
-        //         callback();
-
-        //         if (count === 10) {
-        //             resolve();
-        //         }
-        //     }
-        // })
 
         try {
             const rtpWritable = new RTPWritableTest(rtpSession);
-            // const rtpReadable = new RTPReadableTest(rtpSession);
+            const rtpReadable = new RTPReadableTest(rtpSession);
 
-            // rtpReadable.pipe(steadyConsumer);
+            rtpReadable.pipe(writable);
             audioReadStream.pipe(rtpWritable);
         } catch (ex) {
             t.fail(ex);

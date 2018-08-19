@@ -14,6 +14,7 @@ class PlayCommand extends Command {
 
     static flags = {
         id: flags.string({ description: "output audio device" }),
+        filename: flags.string({ description: "file name" }),
         rate: flags.string({ description: "sample rate" }),
         format: flags.string({ description: "format depth" })
     }
@@ -22,10 +23,10 @@ class PlayCommand extends Command {
         const { flags } = this.parse(PlayCommand);
 
         const id = Number.parseInt(flags.id) || 0;
+        const fileName = flags.filename || "audio.raw";
         const rate = flags.rate || 44100;
         const format = flags.format || 16;
 
-        const fileName = "audio.raw";
         const memFsfilePath = Path.join("/", fileName);
         const path = Path.resolve(__dirname, "../../../../Sample/", fileName);
         const rawAudioFile = Fs.readFileSync(path);

@@ -1,5 +1,4 @@
 import { Writable } from "stream";
-import RTPSession from "./RTPSession";
 import { TCPClient } from "./TCPTransport";
 
 class RTPWritable extends Writable {

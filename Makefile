@@ -11,4 +11,4 @@ up-server:
 	docker run --rm -it --privileged -p 2222:2222 -p 80:80 -p 443:443 -v $(VOLUME_SERVER_RPI):/images "$(NAME_SERVER_RPI)"
 
 down-server:
-	docker stop $(docker ps -a -q --filter $(NAME_SERVER_RPI))
+	docker stop $(shell docker ps -a -q --filter ancestor=$(NAME_SERVER_RPI))

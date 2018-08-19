@@ -1,4 +1,6 @@
 import test from "ava";
+import * as Path from "path";
+import * as Fs from "fs";
 import {TCPServer, TCPClient } from "../../../src/Common/Network/TCPTransport";
 
 const PORT = 1737;
@@ -23,7 +25,7 @@ test("[TCPTransport] Verify client connection", async (t) => {
     t.pass();
 });
 
-test("[TCPTransport] Test data transfer", async (t) => {
+test("[TCPTransport] Data transfer test", async (t) => {
     await new Promise(async (resolve) => {
         const clientMessage = Buffer.from("Hello server!");
         const serverMessage = Buffer.from("Hello client!");
@@ -49,6 +51,46 @@ test("[TCPTransport] Test data transfer", async (t) => {
         })
 
         client.send(clientMessage);
+    })
+
+    t.pass();
+});
+
+test.only("[TCPTransport] Data transfer stress-test", async (t) => {
+    const audioFilepath = Path.resolve(__dirname, "../../Assets/audio.raw");
+    const audioFileBuffer = Fs.readFileSync(audioFilepath)
+    const audioReadStream = Fs.createReadStream(audioFilepath);
+
+    const destinationBuffer = Buffer.allocUnsafe(audioFileBuffer.byteLength);
+
+    let transferByteLength = 0;
+
+    await new Promise(async (resolve) => {
+        const server = new TCPServer(PORT);
+        const client = new TCPClient(PORT);
+
+        server.getServer().on("connection", async (socket) => {
+            socket.on("data", async (data) => {
+                data.copy(destinationBuffer, transferByteLength);
+                transferByteLength += data.byteLength;
+            });
+
+            socket.on("end", async () => {
+                t.deepEqual(destinationBuffer, audioFileBuffer);
+
+                socket.end();
+                await server.close();
+
+                resolve();
+            });
+        });
+
+        client.getSocket().on("end", () => {
+            client.close();
+        })
+
+        await client.connect();
+        audioReadStream.pipe(client.getSocket());
     })
 
     t.pass();

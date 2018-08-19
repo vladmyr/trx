@@ -56,7 +56,7 @@ test("[TCPTransport] Data transfer test", async (t) => {
     t.pass();
 });
 
-test.only("[TCPTransport] Data transfer stress-test", async (t) => {
+test("[TCPTransport] Data transfer stress-test", async (t) => {
     const audioFilepath = Path.resolve(__dirname, "../../Assets/audio.raw");
     const audioFileBuffer = Fs.readFileSync(audioFilepath)
     const audioReadStream = Fs.createReadStream(audioFilepath);

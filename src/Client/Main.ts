@@ -1,16 +1,14 @@
 import * as Fs from "fs";
 
 import AudioStreamManager from "../Common/AudioStreamManager";
-import RTPSession from "../Common/Network/RTPSession";
-import RTPWritable from "../Common/Network/RTPWritable";
+import { TCPClient } from "../Common/Network/TCPTransport";
 
 const audioStreamManager = AudioStreamManager.GetInstance();
 
-const session = new RTPSession(1373);
+const tcpClient = new TCPClient(1373, "pi.local");
+tcpClient.connect();
 
 const audioReadableStream: any = audioStreamManager.getSourceInput(21);
-// const fsWritableStream = Fs.createWriteStream("../../Temp/clientRecord.raw");
-const rtpWritable = new RTPWritable(session);
 
 // rtpWritable.on("close", () => console.log("close"));
 // rtpWritable.on("drain", () => console.log("drain"));
@@ -25,5 +23,5 @@ const rtpWritable = new RTPWritable(session);
 // audioReadableStream.on("error", () => console.log("error"))
 // audioReadableStream.on("readable", () => console.log("readable"))
 
-audioReadableStream.pipe(rtpWritable);
+audioReadableStream.pipe(tcpClient.getSocket());
 audioReadableStream.start();

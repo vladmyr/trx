@@ -1,27 +1,26 @@
 import { Writable } from "stream";
 import RTPSession from "./RTPSession";
+import { TCPClient } from "./TCPTransport";
 
 class RTPWritable extends Writable {
-    protected _session: RTPSession;
+    protected _tcpClient: TCPClient;
 
-    public constructor(session: RTPSession) {
+    public constructor(tcpClient: TCPClient) {
         super({ 
             objectMode: false, 
             decodeStrings: false 
         });
-        this._session = session;
+        this._tcpClient = tcpClient;
     }
 
     public _write(chunk: Uint8Array, _: string, done: Function) {
         const buffer = Buffer.from(chunk);
-        // console.log("[RTPWritable] Sending..", chunk.byteLength, buffer)
-
+        
         try {
-            process.nextTick(() => {
-                this._session.send(buffer);
-            })
-        } catch(e) {
-            console.error(e);
+            // use callback?
+            this._tcpClient.send(buffer)
+        } catch(ex) {
+            console.error(ex);
         }
         
         done();
